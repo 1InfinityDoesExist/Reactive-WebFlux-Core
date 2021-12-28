@@ -13,7 +13,13 @@ public class StreamCall {
 	public static void main(String[] args) {
 		Instant start = Instant.now();
 
-		webClient.get().uri("/persons/events").retrieve().bodyToFlux(Person.class).take(4).blockLast();
+		webClient.get()
+			.uri("/persons/events")
+			.retrieve()
+			.bodyToFlux(Person.class)
+			.doOnNext(person -> System.out.println("Person name : " + person.getName()))
+			.take(4)
+			.blockLast();
 
 		System.out.println("log time : " + Duration.between(start, Instant.now()).toMillis());
 	}

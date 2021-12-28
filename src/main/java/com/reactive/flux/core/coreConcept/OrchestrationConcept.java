@@ -16,14 +16,18 @@ public class OrchestrationConcept {
 	public static void main(String[] args) {
 		Instant start = Instant.now();
 
-		Flux.range(1, 2).flatMap(iter -> webClient.get()
+		Flux.range(1, 2)
+		.doOnNext(i -> System.out.println("Iteration : " + i))
+		.flatMap(iter -> webClient.get()
 				.uri("/person/{id}", iter)
 				.retrieve()
 				.bodyToMono(Person.class)
+				.doOnNext(person -> System.out.println("Person Name : " + person.getName()))
 				.flatMap(person -> webClient.get()
 						.uri("/person/{id}/hobby", iter)
 						.retrieve()
 						.bodyToMono(Hobby.class)
+						.doOnNext(hobby -> System.out.println("Hobby Name : " + hobby.getHobby()))
 						)
 				).blockLast();
 
