@@ -41,9 +41,9 @@ public class TestController {
 	}
 
 	@GetMapping("/person/{id}")
-	public Flux<Person> getPerson(@PathVariable(value = "id") Long id) {
+	public Mono<Person> getPerson(@PathVariable(value = "id") Long id) {
 		log.info("----Inside get Persons api by id");
-		return this.webClient.get().uri("/person/{id}?delay=2", id).retrieve().bodyToFlux(Person.class);
+		return this.webClient.get().uri("/person/{id}?delay=2", id).retrieve().bodyToMono(Person.class);
 	}
 
 	/**
@@ -60,18 +60,17 @@ public class TestController {
 
 	@GetMapping("/accounts/hobbies")
 	public Flux<Map<String, String>> getTopAccountHobbies() {
-		
-		return this.accountRepository.findAll(Sort.by(Sort.Direction.DESC, "score"))
-				.take(5)
+
+		return this.accountRepository.findAll(Sort.by(Sort.Direction.DESC, "score")).take(5)
 				.flatMapSequential(account -> {
 					Long personId = account.getPersonId();
-					
+
 					Mono<String> nameMono = this.webClient.get().uri("/person/{id}?delay=2", personId).retrieve()
 							.bodyToMono(Person.class).map(Person::getName);
-					
+
 					Mono<String> hobbyMono = this.webClient.get().uri("/person/{id}/hobby?delay=2", personId).retrieve()
 							.bodyToMono(Hobby.class).map(Hobby::getHobby);
-					
+
 					return Mono.zip(nameMono, hobbyMono, (personName, hobby) -> {
 						Map<String, String> data = new LinkedHashMap<String, String>();
 						data.put("person", personName);
@@ -79,7 +78,6 @@ public class TestController {
 						return data;
 					});
 				});
-
 	}
 
 }
