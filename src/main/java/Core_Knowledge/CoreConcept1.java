@@ -1,4 +1,4 @@
-package com.reactive.flux.core.coreConcept;
+package Core_Knowledge;
 
 import java.time.Duration;
 import java.time.Instant;
